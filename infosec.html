@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Encrypt/Decrypt</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+</head>
+
+<body>
+    <h1>Super Encryption</h1>
+    <small>Intialize Encryption</small>
+
+    <p>PlainText:</p>
+    <input type="text" name="plaintext" id="plaintext">
+
+    <br><br>
+
+    <p>SecretKey:</p>
+    <input type="text" name="secretkey" id="secretkey">
+
+    <br><br>
+    <br><br>
+
+    <button id="submitBtn">Submit</button>
+
+    <p id="response"></p>
+
+    <br><br>
+
+    <hr>
+    <br><br>
+
+    <h1>Super Decryption</h1>
+    <small>Intialize Decryption</small>
+
+    <p>Encrypted Text:</p>
+    <input type="text" name="plaintext1" id="plaintext1">
+
+
+    <br><br>
+
+    <p>Encrypted Key:</p>
+    <input type="text" name="secretkey1" id="secretkey1">
+
+    <br><br>
+    <br><br>
+
+    <button id="submitBtn1">Submit</button>
+
+    <p id="response1"></p>
+
+
+</body>
+
+</html>
+
+<script>
+    $('#submitBtn').click(function () {
+        pt = $('#plaintext').val()
+        sk = $('#secretkey').val()
+        // sk = "7Ei3H5kO9vJ8X1wP"
+
+        SuperEncrypt(pt, sk);
+    })
+
+    $('#submitBtn1').click(function () {
+        pt = $('#plaintext1').val()
+        sk = $('#secretkey1').val()
+        // sk = "7Ei3H5kO9vJ8X1wP"
+
+        SuperDecrypt(pt, sk);
+    })
+
+    async function AES_encrypt(text, password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
+        const passwordData = encoder.encode(password);
+
+        const key = await crypto.subtle.importKey('raw', passwordData, 'AES-CBC', false, ['encrypt']);
+
+        const iv = crypto.getRandomValues(new Uint8Array(16));
+        const encryptedData = await crypto.subtle.encrypt({
+            name: 'AES-CBC',
+            iv
+        }, key, data);
+        const encryptedArray = Array.from(new Uint8Array(encryptedData));
+        const encryptedText = encryptedArray.map(byte => String.fromCharCode(byte)).join('');
+        const encryptedBase64 = btoa(encryptedText);
+        const ivHex = Array.from(iv).map(byte => ('00' + byte.toString(16)).slice(-2)).join('');
+        return `${encryptedBase64}.${ivHex}`;
+
+    }
+    async function AES_decrypt(encryptedText, password) {
+        const decoder = new TextDecoder();
+        const [encryptedBase64, ivHex] = encryptedText.split('.');
+        const encryptedArray = Array.from(atob(encryptedBase64), byte => byte.charCodeAt(0));
+        const encryptedData = new Uint8Array(encryptedArray);
+        const iv = new Uint8Array(ivHex.match(/.{2}/g).map(byte => parseInt(byte, 16)));
+        const encoder = new TextEncoder();
+        const passwordData = encoder.encode(password);
+        const key = await crypto.subtle.importKey('raw', passwordData, 'AES-CBC', false, ['decrypt']);
+        const decryptedData = await crypto.subtle.decrypt({
+            name: 'AES-CBC',
+            iv
+        }, key, encryptedData);
+        const decryptedText = decoder.decode(decryptedData);
+        return decryptedText;
+    }
+
+
+    var plaintext = "Hello, world!";
+
+    function draft() {
+        // initial key
+        var key1 = "ABCDEFGHIJKLMNOP";
+        var key2 = "PONMLKJIHGFEDCBA";
+
+        // initialize variables
+        var initializedMessage = "test message";
+        var initializedkey = "1234567890123456";
+
+        // aes encrypt
+        AES_encrypt(initializedMessage, key1)
+            .then(encryptedMessage => {
+                console.log(`Original Message: ${initializedMessage}`)
+                console.log('AES Encrypted Message:', encryptedMessage);
+
+                AES_encrypt(initializedkey, key2).then(encryptedKey => {
+                    console.log('AES Encrypted Key:', encryptedKey);
+
+                    finalEncryption = DES_encrypt(encryptedMessage, encryptedKey)
+                    // console.log(`DES Encrypted Key: ${finalEncryption}`)
+                    return {
+                        "EncryptedValue": finalEncryption,
+                        "EncryptionKey": encryptedKey
+                    };
+                }).then(arrval => {
+                    // API Response
+                    console.log(arrval)
+
+                    finalMessage = arrval['EncryptedValue']
+                    finalKey = arrval['EncryptionKey']
+
+                    console.log('DES Encrypted Message:', finalMessage);
+                    console.log('DES Encrypted Key:', finalKey);
+
+
+                    AESEncMessage = DES_decrypt(finalMessage, finalKey)
+
+
+                    return AESEncMessage
+
+                }).then(AESEncMessage => {
+                    sk = "ABCDEFGHIJKLMNOP"
+
+                    console.log(`AES Encrypted Message: ${AESEncMessage}`)
+                    AES_decrypt(AESEncMessage, sk).then(originalMessage => {
+                        console.log(`Original Message: ${originalMessage}`)
+                    }).catch(error => {
+                        // Handle the rejected case
+                        console.error(error);
+                    });
+
+                })
+            })
+    }
+
+
+    function SuperEncrypt(initializedMessage, initializedkey) {
+        // initial key
+        var key1 = "ABCDEFGHIJKLMNOP";
+        var key2 = "PONMLKJIHGFEDCBA";
+
+        // initialize variables
+        // var initializedMessage = "test message";
+        // var initializedkey = "1234567890123456";
+
+        // aes encrypt
+        AES_encrypt(initializedMessage, key1)
+            .then(encryptedMessage => {
+                console.log(`Original Message: ${initializedMessage}`)
+                console.log('AES Encrypted Message:', encryptedMessage);
+
+                AES_encrypt(initializedkey, key2).then(encryptedKey => {
+                    console.log('AES Encrypted Key:', encryptedKey);
+
+                    finalEncryption = DES_encrypt(encryptedMessage, encryptedKey)
+                    // console.log(`DES Encrypted Key: ${finalEncryption}`)
+                    return {
+                        "EncryptedValue": finalEncryption,
+                        "EncryptionKey": encryptedKey
+                    };
+                }).then(arrval => {
+                    // API Response
+                    console.log(arrval)
+
+                    finalMessage = arrval['EncryptedValue']
+                    finalKey = arrval['EncryptionKey']
+
+                    $("#response").html(
+                        `Encrypted Message: ${finalMessage} <br> Encrypted Decryption Key: ${finalKey}`);
+
+                })
+            })
+    }
+
+    function SuperDecrypt(pt, sk) {
+        AESEncMessage = DES_decrypt(pt, sk)
+        var key1 = "ABCDEFGHIJKLMNOP";
+
+        AES_decrypt(AESEncMessage, key1).then(originalMessage => {
+
+            $("#response1").html(
+                `Decrypted Message: ${originalMessage}`);
+        }).catch(error => {
+            // Handle the rejected case
+            console.error(error);
+        });
+    }
+
+
+
+
+
+    // Encryption
+
+    function DES_encrypt(plaintext, key) {
+        var encryptedText = CryptoJS.DES.encrypt(plaintext, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        }).toString();
+
+        return encryptedText;
+    }
+
+    function DES_decrypt(encryptedText, key) {
+        var decryptedText = CryptoJS.DES.decrypt(encryptedText, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        }).toString(CryptoJS.enc.Utf8);
+
+        return decryptedText;
+    }
+
+    // console.log(`DES Encrypted Text: ${DES_encrypt(plaintext, key)}`);
+    // console.log(`DES Decrypted Text: ${DES_decrypt(DES_encrypt(plaintext, key), key)}`);
+
+
+
+    // AES_encrypt(plaintext, key)
+    //     .then(encryptedText => {
+    //         console.log('AES Encrypted Text:', encryptedText);
+    //         // return this.decrypt(encryptedText, encryptionPassword);
+    //         return this.AES_decrypt(encryptedText, key);
+    //     }).then(decrypted1 => {
+    //         console.log('AES Decrypted Text:', decrypted1);
+    //     })
+</script>
