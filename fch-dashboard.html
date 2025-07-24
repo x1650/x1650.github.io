@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinCrimeHub Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Root Variables for Theming --- */
+        :root {
+            --bg-color: #f4f7fa;
+            --card-bg-color: #ffffff;
+            --text-color: #2c3e50;
+            --text-light-color: #7f8c9a;
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --tertiary-color: #e74c3c;
+            --warning-color: #f1c40f;
+            --border-radius: 12px;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.08);
+            --font-family: 'Inter', sans-serif;
+        }
+
+        /* --- General Body and Layout --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 2rem;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+        
+        /* --- Toggle Switch --- */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-light-color);
+        }
+        .toggle-switch span {
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .toggle-active {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        /* --- Grid Layout --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        
+        /* --- Card Base Style --- */
+        .card {
+            background-color: var(--card-bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-light-color);
+            margin-bottom: 1rem;
+        }
+        
+        /* --- Summary Cards --- */
+        .summary-card {
+            grid-column: span 3;
+        }
+        .summary-card .big-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--text-color);
+        }
+        .summary-card .split-number {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .summary-card .split-label {
+            font-size: 0.8rem;
+            color: var(--text-light-color);
+        }
+
+        /* --- Chart & Widget Cards --- */
+        .chart-card, .widget-card {
+            grid-column: span 3;
+        }
+        .chart-container {
+            height: 150px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+        }
+        .bar {
+            width: 30px;
+            background-color: var(--primary-color);
+            border-radius: 4px 4px 0 0;
+            text-align: center;
+            position: relative;
+            transition: height 0.5s ease-out;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -20px;
+            width: 100%;
+            font-size: 0.75rem;
+            color: var(--text-light-color);
+            white-space: nowrap;
+        }
+        .bar-value {
+             position: absolute;
+             top: -20px;
+             width: 100%;
+             font-size: 0.8rem;
+             font-weight: 600;
+        }
+        .donut-chart {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            transition: background 0.5s ease;
+        }
+        .donut-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .donut-center .total { font-size: 1.5rem; font-weight: 700; }
+        .donut-center .label { font-size: 0.8rem; color: var(--text-light-color); }
+        .legend { list-style: none; padding-top: 1rem; text-align: center; }
+        .legend li { display: inline-flex; align-items: center; margin: 0 0.5rem; font-size: 0.85rem; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+        
+        /* --- Trend Chart --- */
+        .trend-card {
+            grid-column: span 12;
+        }
+        .trend-chart-container {
+            height: 250px;
+            width: 100%;
+            position: relative;
+            background: 
+                linear-gradient(to right, #eef1f4 1px, transparent 1px) 0 0 / calc(100% / 11) 100%,
+                linear-gradient(to bottom, #eef1f4 1px, transparent 1px) 0 0 / 100% 25%;
+            border-left: 2px solid #dde3e9;
+            border-bottom: 2px solid #dde3e9;
+        }
+        .trend-line {
+            fill: none;
+            stroke: var(--primary-color);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: d 0.5s ease-in-out;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 1200px) {
+            .summary-card, .chart-card, .widget-card { grid-column: span 6; }
+        }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 1rem;}
+            .grid-container { grid-template-columns: 1fr; }
+            .summary-card, .chart-card, .widget-card, .trend-card { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header>
+            <div>
+                <h1>FinCrimeHub Dashboard</h1>
+                <p style="margin-top: 0.5rem;">Today is <span id="current-date-time"></span></p>
+            
+                <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const now = new Date();
+                    const options = { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+                    const formattedDateTime = now.toLocaleString('en-US', options);
+                    document.getElementById('current-date-time').textContent = formattedDateTime;
+                });
+                </script>
+            </div>
+           
+            <div class="toggle-switch" style="margin-top: 1rem;">
+            <span id="toggle-label-monthly">This Month</span>
+            <label class="switch">
+                <input type="checkbox" id="period-toggle">
+                <span class="slider"></span>
+            </label>
+            <span id="toggle-label-all-time">All Time</span>
+            </div>
+            
+        </header>
+
+        <main class="grid-container">
+            <!-- Row 1: Summary Cards -->
+             
+            <div class="card summary-card">
+                <div class="card-title">Suspension Profiles</div>
+                <div>
+                    <span class="split-number" id="suspended-merchants"></span> <span class="split-label">Merchants</span>
+                </div>
+                 <div>
+                    <span class="split-number" id="suspended-customers"></span> <span class="split-label">Customers</span>
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div class="card-title">AML Transaction Record Filed </div>
+                <div>
+                    <span class="split-number" id="str-filed"></span> <span class="split-label">STR Filed</span>
+                </div>
+                 <div>
+                    <span class="split-number" id="ctr-filed"></span> <span class="split-label">CTR Filed</span>
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div class="card-title">Fraud Cases Raised</div>
+                <div class="big-number" id="fraud-cases"></div>
+            </div>
+            <div class="card summary-card" style="display: none;">
+                <div class="card-title">High-Risk Profiles</div>
+                <div class="big-number" id="high-risk-profiles"></div>
+            </div>
+            
+            <div class="card summary-card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;"></div>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <button onclick="alert('Add Suspension Profile clicked')" 
+                                style="background: transparent; color: var(--primary-color); padding: 1rem; 
+                                       border: 2px solid var(--primary-color); border-radius: 8px; cursor: pointer; 
+                                       font-weight: 600; transition: all 0.2s; font-size: 1.1rem;
+                                       hover: {background: var(--primary-color); color: white}">
+                            + Suspension Profile
+                        </button>
+                        <button onclick="alert('Add AML Record clicked')"
+                                style="background: transparent; color: var(--secondary-color); padding: 1rem; 
+                                       border: 2px solid var(--secondary-color); border-radius: 8px; cursor: pointer; 
+                                       font-weight: 600; transition: all 0.2s; font-size: 1.1rem;
+                                       hover: {background: var(--secondary-color); color: white}">
+                            + AML Transaction Record
+                        </button>
+                    </div>
+                </div>
+
+            <!-- Row 2: Charts Section -->
+            <div class="card chart-card">
+                <div class="card-title">Top 3 Fraud Types</div>
+                <div class="chart-container">
+                    <div class="bar" id="fraud1-bar" style="background-color: var(--primary-color);">
+                        <div class="bar-value" id="fraud1-val"></div><div class="bar-label">Smurfing</div>
+                    </div>
+                    <div class="bar" id="fraud2-bar" style="background-color: var(--tertiary-color);">
+                        <div class="bar-value" id="fraud2-val"></div><div class="bar-label">Structuring</div>
+                    </div>
+                    <div class="bar" id="fraud3-bar" style="background-color: var(--secondary-color);">
+                        <div class="bar-value" id="fraud3-val"></div><div class="bar-label">Mule Acct.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card chart-card">
+                <div class="card-title">Suspension Profile Type</div>
+                 <div class="donut-chart" id="suspension-donut">
+                    <div class="donut-center">
+                        <div class="total" id="suspension-total"></div>
+                        <div class="label">Total</div>
+                    </div>
+                </div>
+                <ul class="legend">
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Merchant</li>
+                    <li><span class="legend-dot" style="background:var(--secondary-color)"></span>Customer</li>
+                </ul>
+            </div>
+            <div class="card chart-card">
+                <div class="card-title">Predicate Crimes Summary</div>
+                 <div class="chart-container">
+                    <div class="bar" id="crime1-bar" style="background-color: var(--primary-color);">
+                        <div class="bar-value" id="crime1-val"></div><div class="bar-label">Fraud</div>
+                    </div>
+                    <div class="bar" id="crime2-bar" style="background-color: var(--tertiary-color);">
+                        <div class="bar-value" id="crime2-val"></div><div class="bar-label">Corruption</div>
+                    </div>
+                    <div class="bar" id="crime3-bar" style="background-color: var(--secondary-color);">
+                        <div class="bar-value" id="crime3-val"></div><div class="bar-label">Trafficking</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card chart-card">
+                <div class="card-title">KYC Level Distribution</div>
+                <div class="donut-chart" id="kyc-donut">
+                     <div class="donut-center">
+                        <div class="total" id="kyc-total"></div>
+                        <div class="label">Profiles</div>
+                    </div>
+                </div>
+                <ul class="legend">
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Lvl 1</li>
+                    <li><span class="legend-dot" style="background:var(--secondary-color)"></span>Lvl 2</li>
+                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Lvl 3</li>
+                </ul>
+            </div>
+
+            
+            <!-- Row 4: Optional Widgets -->
+            <div class="card widget-card">
+                <div class="card-title">Gender Breakdown</div>
+                <div class="donut-chart" id="gender-donut" style="background: conic-gradient(#3498db 0% 65%, #2ecc71 65% 100%);"></div>
+                <ul class="legend">
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Male (65%)</li>
+                    <li><span class="legend-dot" style="background:var(--secondary-color)"></span>Female (35%)</li>
+                </ul>
+            </div>
+             <div class="card widget-card">
+                <div class="card-title">Nationality Breakdown</div>
+                <div class="donut-chart" id="nation-donut" style="background: conic-gradient(#3498db 0% 70%, #e74c3c 70% 90%, #f1c40f 90% 100%);"></div>
+                 <ul class="legend">
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Local (70%)</li>
+                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Foreign (20%)</li>
+                     <li><span class="legend-dot" style="background:var(--warning-color)"></span>Other (10%)</li>
+                </ul>
+            </div>
+             <div class="card widget-card">
+                <div class="card-title">Source of Report</div>
+                <div class="donut-chart" id="nation-donut" style="background: conic-gradient(#3498db 0% 70%, #e74c3c 70% 90%, #f1c40f 90% 100%);"></div>
+                 <ul class="legend">
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Value-1 (70%)</li>
+                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Value-2 (20%)</li>
+                     <li><span class="legend-dot" style="background:var(--warning-color)"></span>Value-3 (10%)</li>
+                </ul>
+            </div>
+             <div class="card widget-card">
+                <div class="card-title">Scenario Type</div>
+                <div class="donut-chart" id="nation-donut" style="background: conic-gradient(#3498db 0% 70%, #e74c3c 70% 90%, #f1c40f 90% 100%);"></div>
+                 <ul class="legend">
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Value-1 (70%)</li>
+                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Value-2 (20%)</li>
+                     <li><span class="legend-dot" style="background:var(--warning-color)"></span>Value-3 (10%)</li>
+                </ul>
+            </div>
+
+            
+            <!-- Row 3: Trend Chart -->
+            <div class="card trend-card">
+                <div class="card-title">AML Transaction Record Filed per Month (12-month trend)</div>
+                 <div class="trend-chart-container">
+                    <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
+                      <path id="trend-line" class="trend-line" d="" />
+                    </svg>
+                 </div>
+            </div>
+
+            
+            <div class="card trend-card">
+                <div class="card-title">Suspension Profiles per Month (12-month trend)</div>
+                 <div class="trend-chart-container">
+                    <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
+                      <path id="trend-line1" class="trend-line" d="" />
+                    </svg>
+                 </div>
+            </div>
+
+            
+            <div class="card trend-card">
+                <div class="card-title">Fraud Cases Raised per Month (12-month trend)</div>
+                 <div class="trend-chart-container">
+                    <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
+                      <path id="trend-line2" class="trend-line" d="" />
+                    </svg>
+                 </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Data Store ---
+    const data = {
+        monthly: {
+            strFiled: 105,
+            ctrFiled: 4047,
+            fraudCases: 98,
+            suspendedMerchants: 12,
+            suspendedCustomers: 31,
+            highRiskProfiles: 245,
+            fraudTypes: { values: [21, 45, 15], max: 50 },
+            predicateCrimes: { values: [52, 18, 28], max: 60 },
+            suspension: { merchants: 12, customers: 31 },
+            kyc: { l1: 1200, l2: 3500, l3: 850 },
+            trendPoints: [85, 70, 75, 60, 65, 50, 55, 40, 30, 45, 50, 42]
+        },
+        allTime: {
+            strFiled: 2843,
+            ctrFiled: 110000,
+            fraudCases: 2109,
+            suspendedMerchants: 489,
+            suspendedCustomers: 1156,
+            highRiskProfiles: 245, // This value is static
+            fraudTypes: { values: [603, 998, 312], max: 1000 },
+            predicateCrimes: { values: [1105, 490, 1540], max: 1600 },
+            suspension: { merchants: 489, customers: 1156 },
+            kyc: { l1: 25000, l2: 78000, l3: 9843 },
+            trendPoints: [100, 80, 85, 60, 65, 40, 50, 30, 20, 45, 55, 40]
+        }
+    };
+
+    // --- DOM Element Cache ---
+    const elements = {
+        toggle: document.getElementById('period-toggle'),
+        toggleLabelMonthly: document.getElementById('toggle-label-monthly'),
+        toggleLabelAllTime: document.getElementById('toggle-label-all-time'),
+        strFiled: document.getElementById('str-filed'),
+        ctrFiled: document.getElementById('ctr-filed'),
+        fraudCases: document.getElementById('fraud-cases'),
+        suspendedMerchants: document.getElementById('suspended-merchants'),
+        suspendedCustomers: document.getElementById('suspended-customers'),
+        highRiskProfiles: document.getElementById('high-risk-profiles'),
+        fraud1Val: document.getElementById('fraud1-val'),
+        fraud2Val: document.getElementById('fraud2-val'),
+        fraud3Val: document.getElementById('fraud3-val'),
+        fraud1Bar: document.getElementById('fraud1-bar'),
+        fraud2Bar: document.getElementById('fraud2-bar'),
+        fraud3Bar: document.getElementById('fraud3-bar'),
+        crime1Val: document.getElementById('crime1-val'),
+        crime2Val: document.getElementById('crime2-val'),
+        crime3Val: document.getElementById('crime3-val'),
+        crime1Bar: document.getElementById('crime1-bar'),
+        crime2Bar: document.getElementById('crime2-bar'),
+        crime3Bar: document.getElementById('crime3-bar'),
+        suspensionTotal: document.getElementById('suspension-total'),
+        suspensionDonut: document.getElementById('suspension-donut'),
+        kycTotal: document.getElementById('kyc-total'),
+        kycDonut: document.getElementById('kyc-donut'),
+        trendLine: document.getElementById('trend-line'),
+        trendLine1: document.getElementById('trend-line1'),
+        trendLine2: document.getElementById('trend-line2')
+    };
+
+    // --- Helper to format numbers with commas ---
+    const formatNumber = (num) => num.toLocaleString('en-US');
+
+    // --- Function to create SVG path for trend line ---
+    const createSvgPath = (points) => {
+        const width = 500;
+        const height = 100;
+        const step = width / (points.length - 1);
+        let path = `M 0,${height - points[0]}`;
+        points.forEach((point, i) => {
+            if (i > 0) {
+                const x = i * step;
+                const y = height - point;
+                const prevX = (i - 1) * step;
+                const prevY = height - points[i-1];
+                const cp1x = prevX + step / 2;
+                const cp1y = prevY;
+                const cp2x = x - step / 2;
+                const cp2y = y;
+                path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x},${y}`;
+            }
+        });
+        return path;
+    };
+
+    // --- Main Update Function ---
+    function updateDashboard(period) {
+        const d = data[period];
+        
+        // Update summary cards
+        elements.strFiled.textContent = formatNumber(d.strFiled);
+        elements.ctrFiled.textContent = formatNumber(d.ctrFiled);
+        elements.fraudCases.textContent = formatNumber(d.fraudCases);
+        elements.suspendedMerchants.textContent = formatNumber(d.suspendedMerchants);
+        elements.suspendedCustomers.textContent = formatNumber(d.suspendedCustomers);
+        elements.highRiskProfiles.textContent = formatNumber(d.highRiskProfiles);
+        
+        // Update bar charts
+        const updateBarChart = (vals, max, bar1, bar2, bar3, val1, val2, val3) => {
+            val1.textContent = formatNumber(vals[0]);
+            val2.textContent = formatNumber(vals[1]);
+            val3.textContent = formatNumber(vals[2]);
+            bar1.style.height = `${(vals[0] / max) * 100}%`;
+            bar2.style.height = `${(vals[1] / max) * 100}%`;
+            bar3.style.height = `${(vals[2] / max) * 100}%`;
+        };
+        updateBarChart(d.fraudTypes.values, d.fraudTypes.max, elements.fraud1Bar, elements.fraud2Bar, elements.fraud3Bar, elements.fraud1Val, elements.fraud2Val, elements.fraud3Val);
+        updateBarChart(d.predicateCrimes.values, d.predicateCrimes.max, elements.crime1Bar, elements.crime2Bar, elements.crime3Bar, elements.crime1Val, elements.crime2Val, elements.crime3Val);
+
+        // Update donut charts
+        const updateDonutChart = (values, totalEl, donutEl, colors) => {
+            const total = values.reduce((a, b) => a + b, 0);
+            totalEl.textContent = formatNumber(total);
+            let cumulativePercent = 0;
+            const gradientParts = values.map((val, i) => {
+                const percent = (val / total) * 100;
+                const start = cumulativePercent;
+                cumulativePercent += percent;
+                return `${colors[i]} ${start}% ${cumulativePercent}%`;
+            });
+            donutEl.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+        };
+        updateDonutChart([d.suspension.merchants, d.suspension.customers], elements.suspensionTotal, elements.suspensionDonut, ['var(--primary-color)', 'var(--secondary-color)']);
+        updateDonutChart([d.kyc.l1, d.kyc.l2, d.kyc.l3], elements.kycTotal, elements.kycDonut, ['var(--primary-color)', 'var(--secondary-color)', 'var(--tertiary-color)']);
+
+        // Update trend line chart
+        elements.trendLine.setAttribute('d', createSvgPath(d.trendPoints));
+        elements.trendLine1.setAttribute('d', createSvgPath(d.trendPoints));
+        elements.trendLine2.setAttribute('d', createSvgPath(d.trendPoints));
+
+        // Update toggle label styles
+        elements.toggleLabelMonthly.classList.toggle('toggle-active', period === 'monthly');
+        elements.toggleLabelAllTime.classList.toggle('toggle-active', period === 'allTime');
+    }
+
+    // --- Event Listener ---
+    elements.toggle.addEventListener('change', (event) => {
+        updateDashboard(event.currentTarget.checked ? 'allTime' : 'monthly');
+    });
+
+    // --- Initial Load ---
+    updateDashboard('monthly');
+});
+</script>
+
+</body>
+</html>
+
+
