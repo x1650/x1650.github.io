@@ -18,6 +18,8 @@
             --secondary-color: #2ecc71;
             --tertiary-color: #e74c3c;
             --warning-color: #f1c40f;
+            --purple-color: #9b59b6;
+            --orange-color: #e67e22;
             --border-radius: 12px;
             --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.08);
@@ -145,9 +147,9 @@
             grid-column: span 3;
         }
         .summary-card .big-number {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            line-height: 1.1;
+            line-height: 1.2;
             color: var(--text-color);
         }
         .summary-card .split-number {
@@ -161,7 +163,7 @@
 
         /* --- Chart & Widget Cards --- */
         .chart-card, .widget-card {
-            grid-column: span 3;
+            grid-column: span 6;
         }
         .chart-container {
             height: 150px;
@@ -170,7 +172,7 @@
             justify-content: space-around;
         }
         .bar {
-            width: 30px;
+            width: 22px; /* Adjusted for 5 bars */
             background-color: var(--primary-color);
             border-radius: 4px 4px 0 0;
             text-align: center;
@@ -235,6 +237,35 @@
             transition: d 0.5s ease-in-out;
         }
 
+        /* --- Action Buttons --- */
+        .action-button {
+            background: transparent;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+        .action-button-primary {
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        .action-button-primary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        .action-button-secondary {
+            color: var(--secondary-color);
+            border: 2px solid var(--secondary-color);
+        }
+        .action-button-secondary:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
         /* --- Responsive Design --- */
         @media (max-width: 1200px) {
             .summary-card, .chart-card, .widget-card { grid-column: span 6; }
@@ -243,7 +274,7 @@
             body { padding: 1rem; }
             header { flex-direction: column; align-items: flex-start; gap: 1rem;}
             .grid-container { grid-template-columns: 1fr; }
-            .summary-card, .chart-card, .widget-card, .trend-card { grid-column: span 1; }
+            .summary-card, .chart-card, .widget-card, .trend-card { grid-column: span 1 !important; } /* Important to override inline styles */
         }
     </style>
 </head>
@@ -278,7 +309,6 @@
 
         <main class="grid-container">
             <!-- Row 1: Summary Cards -->
-             
             <div class="card summary-card">
                 <div class="card-title">Suspension Profiles</div>
                 <div>
@@ -301,34 +331,30 @@
                 <div class="card-title">Fraud Cases Raised</div>
                 <div class="big-number" id="fraud-cases"></div>
             </div>
-            <div class="card summary-card" style="display: none;">
-                <div class="card-title">High-Risk Profiles</div>
-                <div class="big-number" id="high-risk-profiles"></div>
-            </div>
-            
-            <div class="card summary-card">
-                <div style="display: flex; flex-direction: column; gap: 1rem;"></div>
-                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                        <button onclick="alert('Add Suspension Profile clicked')" 
-                                style="background: transparent; color: var(--primary-color); padding: 1rem; 
-                                       border: 2px solid var(--primary-color); border-radius: 8px; cursor: pointer; 
-                                       font-weight: 600; transition: all 0.2s; font-size: 1.1rem;
-                                       hover: {background: var(--primary-color); color: white}">
-                            + Suspension Profile
-                        </button>
-                        <button onclick="alert('Add AML Record clicked')"
-                                style="background: transparent; color: var(--secondary-color); padding: 1rem; 
-                                       border: 2px solid var(--secondary-color); border-radius: 8px; cursor: pointer; 
-                                       font-weight: 600; transition: all 0.2s; font-size: 1.1rem;
-                                       hover: {background: var(--secondary-color); color: white}">
-                            + AML Transaction Record
-                        </button>
-                    </div>
+             <div class="card summary-card">
+                <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 1rem;">
+                    <button onclick="console.log('Add Suspension Profile clicked')" class="action-button action-button-primary">
+                        + Suspension Profile
+                    </button>
+                    <button onclick="console.log('Add AML Record clicked')" class="action-button action-button-secondary">
+                        + AML Transaction Record
+                    </button>
                 </div>
+            </div>
 
-            <!-- Row 2: Charts Section -->
+            <!-- Row 2: Monetary Summary -->
+            <div class="card summary-card" style="grid-column: span 6;">
+                <div class="card-title">Inward Amount</div>
+                <div class="big-number" id="inward-amount"></div>
+            </div>
+            <div class="card summary-card" style="grid-column: span 6;">
+                <div class="card-title">Outward Amount</div>
+                <div class="big-number" id="outward-amount"></div>
+            </div>
+
+            <!-- Row 3: Charts Section -->
             <div class="card chart-card">
-                <div class="card-title">Top 3 Fraud Types</div>
+                <div class="card-title">Top 5 Fraud Types</div>
                 <div class="chart-container">
                     <div class="bar" id="fraud1-bar" style="background-color: var(--primary-color);">
                         <div class="bar-value" id="fraud1-val"></div><div class="bar-label">Smurfing</div>
@@ -339,20 +365,13 @@
                     <div class="bar" id="fraud3-bar" style="background-color: var(--secondary-color);">
                         <div class="bar-value" id="fraud3-val"></div><div class="bar-label">Mule Acct.</div>
                     </div>
-                </div>
-            </div>
-            <div class="card chart-card">
-                <div class="card-title">Suspension Profile Type</div>
-                 <div class="donut-chart" id="suspension-donut">
-                    <div class="donut-center">
-                        <div class="total" id="suspension-total"></div>
-                        <div class="label">Total</div>
+                    <div class="bar" id="fraud4-bar" style="background-color: var(--warning-color);">
+                        <div class="bar-value" id="fraud4-val"></div><div class="bar-label">Phishing</div>
+                    </div>
+                    <div class="bar" id="fraud5-bar" style="background-color: var(--purple-color);">
+                        <div class="bar-value" id="fraud5-val"></div><div class="bar-label">ID Theft</div>
                     </div>
                 </div>
-                <ul class="legend">
-                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Merchant</li>
-                    <li><span class="legend-dot" style="background:var(--secondary-color)"></span>Customer</li>
-                </ul>
             </div>
             <div class="card chart-card">
                 <div class="card-title">Predicate Crimes Summary</div>
@@ -366,9 +385,30 @@
                     <div class="bar" id="crime3-bar" style="background-color: var(--secondary-color);">
                         <div class="bar-value" id="crime3-val"></div><div class="bar-label">Trafficking</div>
                     </div>
+                     <div class="bar" id="crime4-bar" style="background-color: var(--warning-color);">
+                        <div class="bar-value" id="crime4-val"></div><div class="bar-label">Cybercrime</div>
+                    </div>
+                    <div class="bar" id="crime5-bar" style="background-color: var(--purple-color);">
+                        <div class="bar-value" id="crime5-val"></div><div class="bar-label">Smuggling</div>
+                    </div>
                 </div>
             </div>
-            <div class="card chart-card">
+            
+            <!-- Row 4: Other Widgets -->
+             <div class="card widget-card">
+                <div class="card-title">Suspension Profile Type</div>
+                 <div class="donut-chart" id="suspension-donut">
+                    <div class="donut-center">
+                        <div class="total" id="suspension-total"></div>
+                        <div class="label">Total</div>
+                    </div>
+                </div>
+                <ul class="legend">
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Merchant</li>
+                    <li><span class="legend-dot" style="background:var(--secondary-color)"></span>Customer</li>
+                </ul>
+            </div>
+            <div class="card widget-card">
                 <div class="card-title">KYC Level Distribution</div>
                 <div class="donut-chart" id="kyc-donut">
                      <div class="donut-center">
@@ -382,72 +422,57 @@
                     <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Lvl 3</li>
                 </ul>
             </div>
-
-            
-            <!-- Row 4: Optional Widgets -->
-            <div class="card widget-card">
-                <div class="card-title">Gender Breakdown</div>
-                <div class="donut-chart" id="gender-donut" style="background: conic-gradient(#3498db 0% 65%, #2ecc71 65% 100%);"></div>
-                <ul class="legend">
-                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Male (65%)</li>
-                    <li><span class="legend-dot" style="background:var(--secondary-color)"></span>Female (35%)</li>
-                </ul>
-            </div>
-             <div class="card widget-card">
-                <div class="card-title">Nationality Breakdown</div>
-                <div class="donut-chart" id="nation-donut" style="background: conic-gradient(#3498db 0% 70%, #e74c3c 70% 90%, #f1c40f 90% 100%);"></div>
-                 <ul class="legend">
-                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Local (70%)</li>
-                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Foreign (20%)</li>
-                     <li><span class="legend-dot" style="background:var(--warning-color)"></span>Other (10%)</li>
-                </ul>
-            </div>
              <div class="card widget-card">
                 <div class="card-title">Source of Report</div>
-                <div class="donut-chart" id="nation-donut" style="background: conic-gradient(#3498db 0% 70%, #e74c3c 70% 90%, #f1c40f 90% 100%);"></div>
+                <div class="donut-chart" id="source-report-donut">
+                     <div class="donut-center">
+                        <div class="total" id="source-report-total"></div>
+                        <div class="label">Reports</div>
+                    </div>
+                </div>
                  <ul class="legend">
-                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Value-1 (70%)</li>
-                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Value-2 (20%)</li>
-                     <li><span class="legend-dot" style="background:var(--warning-color)"></span>Value-3 (10%)</li>
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Internal</li>
+                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>External</li>
+                     <li><span class="legend-dot" style="background:var(--warning-color)"></span>System</li>
                 </ul>
             </div>
              <div class="card widget-card">
                 <div class="card-title">Scenario Type</div>
-                <div class="donut-chart" id="nation-donut" style="background: conic-gradient(#3498db 0% 70%, #e74c3c 70% 90%, #f1c40f 90% 100%);"></div>
+                <div class="donut-chart" id="scenario-type-donut">
+                     <div class="donut-center">
+                        <div class="total" id="scenario-type-total"></div>
+                        <div class="label">Scenarios</div>
+                    </div>
+                </div>
                  <ul class="legend">
-                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Value-1 (70%)</li>
-                    <li><span class="legend-dot" style="background:var(--tertiary-color)"></span>Value-2 (20%)</li>
-                     <li><span class="legend-dot" style="background:var(--warning-color)"></span>Value-3 (10%)</li>
+                    <li><span class="legend-dot" style="background:var(--primary-color)"></span>Velocity</li>
+                    <li><span class="legend-dot" style="background:var(--secondary-color)"></span>High Value</li>
+                     <li><span class="legend-dot" style="background:var(--purple-color)"></span>Unusual</li>
                 </ul>
             </div>
 
-            
-            <!-- Row 3: Trend Chart -->
+            <!-- Row 5: Trend Charts -->
             <div class="card trend-card">
                 <div class="card-title">AML Transaction Record Filed per Month (12-month trend)</div>
                  <div class="trend-chart-container">
                     <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
-                      <path id="trend-line" class="trend-line" d="" />
+                      <path id="trend-line-aml" class="trend-line" d="" />
                     </svg>
                  </div>
             </div>
-
-            
             <div class="card trend-card">
                 <div class="card-title">Suspension Profiles per Month (12-month trend)</div>
                  <div class="trend-chart-container">
                     <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
-                      <path id="trend-line1" class="trend-line" d="" />
+                      <path id="trend-line-suspensions" class="trend-line" style="stroke: var(--secondary-color);" d="" />
                     </svg>
                  </div>
             </div>
-
-            
             <div class="card trend-card">
                 <div class="card-title">Fraud Cases Raised per Month (12-month trend)</div>
                  <div class="trend-chart-container">
                     <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
-                      <path id="trend-line2" class="trend-line" d="" />
+                      <path id="trend-line-fraud" class="trend-line" style="stroke: var(--tertiary-color);" d="" />
                     </svg>
                  </div>
             </div>
@@ -464,12 +489,17 @@ document.addEventListener('DOMContentLoaded', function () {
             fraudCases: 98,
             suspendedMerchants: 12,
             suspendedCustomers: 31,
-            highRiskProfiles: 245,
-            fraudTypes: { values: [21, 45, 15], max: 50 },
-            predicateCrimes: { values: [52, 18, 28], max: 60 },
+            inwardAmount: 5250000.75,
+            outwardAmount: 3100000.50,
+            fraudTypes: { values: [45, 21, 15, 12, 8], max: 50 },
+            predicateCrimes: { values: [52, 28, 18, 11, 9], max: 60 },
             suspension: { merchants: 12, customers: 31 },
             kyc: { l1: 1200, l2: 3500, l3: 850 },
-            trendPoints: [85, 70, 75, 60, 65, 50, 55, 40, 30, 45, 50, 42]
+            sourceReport: { values: [89, 42, 15] },
+            scenarioType: { values: [55, 30, 13] },
+            trendPointsAml: [85, 70, 75, 60, 65, 50, 55, 40, 30, 45, 50, 42],
+            trendPointsSuspensions: [10, 12, 8, 15, 11, 9, 14, 16, 10, 13, 11, 14],
+            trendPointsFraud: [25, 22, 30, 28, 35, 32, 29, 38, 40, 33, 36, 31]
         },
         allTime: {
             strFiled: 2843,
@@ -477,12 +507,17 @@ document.addEventListener('DOMContentLoaded', function () {
             fraudCases: 2109,
             suspendedMerchants: 489,
             suspendedCustomers: 1156,
-            highRiskProfiles: 245, // This value is static
-            fraudTypes: { values: [603, 998, 312], max: 1000 },
-            predicateCrimes: { values: [1105, 490, 1540], max: 1600 },
+            inwardAmount: 150750000.00,
+            outwardAmount: 98500000.00,
+            fraudTypes: { values: [998, 603, 312, 250, 180], max: 1000 },
+            predicateCrimes: { values: [1540, 1105, 490, 750, 600], max: 1600 },
             suspension: { merchants: 489, customers: 1156 },
             kyc: { l1: 25000, l2: 78000, l3: 9843 },
-            trendPoints: [100, 80, 85, 60, 65, 40, 50, 30, 20, 45, 55, 40]
+            sourceReport: { values: [1200, 540, 369] },
+            scenarioType: { values: [980, 734, 395] },
+            trendPointsAml: [100, 80, 85, 60, 65, 40, 50, 30, 20, 45, 55, 40],
+            trendPointsSuspensions: [40, 42, 38, 45, 41, 39, 44, 46, 40, 43, 41, 44],
+            trendPointsFraud: [150, 122, 130, 128, 135, 132, 129, 138, 140, 133, 136, 131]
         }
     };
 
@@ -496,43 +531,46 @@ document.addEventListener('DOMContentLoaded', function () {
         fraudCases: document.getElementById('fraud-cases'),
         suspendedMerchants: document.getElementById('suspended-merchants'),
         suspendedCustomers: document.getElementById('suspended-customers'),
-        highRiskProfiles: document.getElementById('high-risk-profiles'),
-        fraud1Val: document.getElementById('fraud1-val'),
-        fraud2Val: document.getElementById('fraud2-val'),
-        fraud3Val: document.getElementById('fraud3-val'),
-        fraud1Bar: document.getElementById('fraud1-bar'),
-        fraud2Bar: document.getElementById('fraud2-bar'),
-        fraud3Bar: document.getElementById('fraud3-bar'),
-        crime1Val: document.getElementById('crime1-val'),
-        crime2Val: document.getElementById('crime2-val'),
-        crime3Val: document.getElementById('crime3-val'),
-        crime1Bar: document.getElementById('crime1-bar'),
-        crime2Bar: document.getElementById('crime2-bar'),
-        crime3Bar: document.getElementById('crime3-bar'),
+        inwardAmount: document.getElementById('inward-amount'),
+        outwardAmount: document.getElementById('outward-amount'),
+        
+        fraudVals: Array.from({length: 5}, (_, i) => document.getElementById(`fraud${i+1}-val`)),
+        fraudBars: Array.from({length: 5}, (_, i) => document.getElementById(`fraud${i+1}-bar`)),
+        crimeVals: Array.from({length: 5}, (_, i) => document.getElementById(`crime${i+1}-val`)),
+        crimeBars: Array.from({length: 5}, (_, i) => document.getElementById(`crime${i+1}-bar`)),
+
         suspensionTotal: document.getElementById('suspension-total'),
         suspensionDonut: document.getElementById('suspension-donut'),
         kycTotal: document.getElementById('kyc-total'),
         kycDonut: document.getElementById('kyc-donut'),
-        trendLine: document.getElementById('trend-line'),
-        trendLine1: document.getElementById('trend-line1'),
-        trendLine2: document.getElementById('trend-line2')
+        sourceReportTotal: document.getElementById('source-report-total'),
+        sourceReportDonut: document.getElementById('source-report-donut'),
+        scenarioTypeTotal: document.getElementById('scenario-type-total'),
+        scenarioTypeDonut: document.getElementById('scenario-type-donut'),
+
+        trendLineAml: document.getElementById('trend-line-aml'),
+        trendLineSuspensions: document.getElementById('trend-line-suspensions'),
+        trendLineFraud: document.getElementById('trend-line-fraud'),
     };
 
-    // --- Helper to format numbers with commas ---
+    // --- Helper Formatters ---
     const formatNumber = (num) => num.toLocaleString('en-US');
+    const formatCurrency = (num) => '₱' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // --- Function to create SVG path for trend line ---
     const createSvgPath = (points) => {
         const width = 500;
         const height = 100;
+        const maxPoint = Math.max(...points) * 1.1; // Add some padding
+        if (maxPoint === 0) return `M 0,${height}`; // Handle case with no data
         const step = width / (points.length - 1);
-        let path = `M 0,${height - points[0]}`;
+        let path = `M 0,${height - (points[0]/maxPoint * height)}`;
         points.forEach((point, i) => {
             if (i > 0) {
                 const x = i * step;
-                const y = height - point;
+                const y = height - (point/maxPoint * height);
                 const prevX = (i - 1) * step;
-                const prevY = height - points[i-1];
+                const prevY = height - (points[i-1]/maxPoint * height);
                 const cp1x = prevX + step / 2;
                 const cp1y = prevY;
                 const cp2x = x - step / 2;
@@ -553,24 +591,29 @@ document.addEventListener('DOMContentLoaded', function () {
         elements.fraudCases.textContent = formatNumber(d.fraudCases);
         elements.suspendedMerchants.textContent = formatNumber(d.suspendedMerchants);
         elements.suspendedCustomers.textContent = formatNumber(d.suspendedCustomers);
-        elements.highRiskProfiles.textContent = formatNumber(d.highRiskProfiles);
+        elements.inwardAmount.textContent = formatCurrency(d.inwardAmount);
+        elements.outwardAmount.textContent = formatCurrency(d.outwardAmount);
         
         // Update bar charts
-        const updateBarChart = (vals, max, bar1, bar2, bar3, val1, val2, val3) => {
-            val1.textContent = formatNumber(vals[0]);
-            val2.textContent = formatNumber(vals[1]);
-            val3.textContent = formatNumber(vals[2]);
-            bar1.style.height = `${(vals[0] / max) * 100}%`;
-            bar2.style.height = `${(vals[1] / max) * 100}%`;
-            bar3.style.height = `${(vals[2] / max) * 100}%`;
+        const updateBarChart = (values, max, barElements, valElements) => {
+            values.forEach((value, index) => {
+                if (barElements[index] && valElements[index]) {
+                    valElements[index].textContent = formatNumber(value);
+                    barElements[index].style.height = `${(value / max) * 100}%`;
+                }
+            });
         };
-        updateBarChart(d.fraudTypes.values, d.fraudTypes.max, elements.fraud1Bar, elements.fraud2Bar, elements.fraud3Bar, elements.fraud1Val, elements.fraud2Val, elements.fraud3Val);
-        updateBarChart(d.predicateCrimes.values, d.predicateCrimes.max, elements.crime1Bar, elements.crime2Bar, elements.crime3Bar, elements.crime1Val, elements.crime2Val, elements.crime3Val);
+        updateBarChart(d.fraudTypes.values, d.fraudTypes.max, elements.fraudBars, elements.fraudVals);
+        updateBarChart(d.predicateCrimes.values, d.predicateCrimes.max, elements.crimeBars, elements.crimeVals);
 
         // Update donut charts
         const updateDonutChart = (values, totalEl, donutEl, colors) => {
             const total = values.reduce((a, b) => a + b, 0);
             totalEl.textContent = formatNumber(total);
+            if (total === 0) {
+                donutEl.style.background = '#eee';
+                return;
+            }
             let cumulativePercent = 0;
             const gradientParts = values.map((val, i) => {
                 const percent = (val / total) * 100;
@@ -582,11 +625,13 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         updateDonutChart([d.suspension.merchants, d.suspension.customers], elements.suspensionTotal, elements.suspensionDonut, ['var(--primary-color)', 'var(--secondary-color)']);
         updateDonutChart([d.kyc.l1, d.kyc.l2, d.kyc.l3], elements.kycTotal, elements.kycDonut, ['var(--primary-color)', 'var(--secondary-color)', 'var(--tertiary-color)']);
+        updateDonutChart(d.sourceReport.values, elements.sourceReportTotal, elements.sourceReportDonut, ['var(--primary-color)', 'var(--tertiary-color)', 'var(--warning-color)']);
+        updateDonutChart(d.scenarioType.values, elements.scenarioTypeTotal, elements.scenarioTypeDonut, ['var(--primary-color)', 'var(--secondary-color)', 'var(--purple-color)']);
 
-        // Update trend line chart
-        elements.trendLine.setAttribute('d', createSvgPath(d.trendPoints));
-        elements.trendLine1.setAttribute('d', createSvgPath(d.trendPoints));
-        elements.trendLine2.setAttribute('d', createSvgPath(d.trendPoints));
+        // Update trend line charts
+        elements.trendLineAml.setAttribute('d', createSvgPath(d.trendPointsAml));
+        elements.trendLineSuspensions.setAttribute('d', createSvgPath(d.trendPointsSuspensions));
+        elements.trendLineFraud.setAttribute('d', createSvgPath(d.trendPointsFraud));
 
         // Update toggle label styles
         elements.toggleLabelMonthly.classList.toggle('toggle-active', period === 'monthly');
@@ -605,5 +650,3 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
-
-
